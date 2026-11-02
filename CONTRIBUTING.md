@@ -41,16 +41,22 @@ See [docs/architecture.md](docs/architecture.md). The essentials:
    node scripts/validate.mjs
    ```
 
-5. If you have Claude Code, also run its validator:
+5. If you changed the installer in `cli/`, run its tests:
+
+   ```bash
+   npm test
+   ```
+
+6. If you have Claude Code, also run its validator:
 
    ```bash
    claude plugin validate .
    ```
 
-6. Add an entry to `CHANGELOG.md` under `## [Unreleased]`.
-7. Open a pull request and complete the checklist.
+7. Add an entry to `CHANGELOG.md` under `## [Unreleased]`.
+8. Open a pull request and complete the checklist.
 
-The scripts need Node.js 18 or later and have no dependencies.
+The scripts and the installer need Node.js 18.3 or later and have no dependencies.
 
 ## Writing a skill
 
@@ -107,6 +113,13 @@ Use short conventional commit messages, such as `fix: correct Gemini skill path`
 
 ## Releases
 
-Maintainers release by moving `[Unreleased]` entries under a new version heading in `CHANGELOG.md` and setting the same version in `.claude-plugin/plugin.json` and `gemini-extension.json`. The validator checks that they match. Claude Code users receive an update only when this version changes.
+Maintainers release by:
+
+1. Moving `[Unreleased]` entries under a new version heading in `CHANGELOG.md`.
+2. Setting the same version in `.claude-plugin/plugin.json`, `gemini-extension.json` and `package.json`. The validator checks that all four match.
+3. Running `node scripts/validate.mjs` and `npm test`, and checking the package contents with `npm pack --dry-run`.
+4. Tagging the release (`git tag v1.2.0`), pushing it, and publishing to npm with `npm publish`.
+
+Claude Code users receive an update only when the version changes; npx users get the new version on their next run.
 
 Versioning follows [Semantic Versioning](https://semver.org/). Renaming or removing a skill, subagent or principle, or changing an installation path, is a major change.

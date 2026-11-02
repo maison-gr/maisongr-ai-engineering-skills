@@ -17,6 +17,38 @@ Install both. The principles set the standard; the skills carry the detailed met
 
 **One copy for four agents.** Codex, Cursor, GitHub Copilot and Gemini CLI all read skills from `.agents/skills/` in the project. Claude Code reads `.claude/skills/` instead, or uses the plugin.
 
+## Fastest: npx
+
+One command installs everything for every agent. Run it from your project's root (Node.js 18.3 or later):
+
+```bash
+npx maisongr-skills
+```
+
+What it does, for the agents you choose (all five by default):
+
+| Writes | For | Behaviour with existing files |
+|---|---|---|
+| `AGENTS.md` | Every agent | Adds the principles in a marked block above your content; updates only that block on later runs |
+| `.agents/skills/maisongr-*` | Codex, Cursor, Copilot, Gemini CLI | Replaces only `maisongr-*` folders |
+| `.claude/skills/maisongr-*`, `.claude/agents/maisongr-*.md` | Claude Code | Replaces only `maisongr-*` files |
+| `CLAUDE.md` | Claude Code | Adds an `@AGENTS.md` line if missing |
+| `.gemini/settings.json` | Gemini CLI | Adds `AGENTS.md` to `context.fileName`, keeping your other settings |
+
+Options:
+
+| Command | Effect |
+|---|---|
+| `npx maisongr-skills --agent claude,codex` | Only the named agents: `claude`, `codex`, `cursor`, `copilot`, `gemini` |
+| `npx maisongr-skills --global` | Installs for your user account: skills in `~/.agents/skills` and `~/.claude/skills`, principles in `~/.claude/AGENTS.md` (imported by `~/.claude/CLAUDE.md`), `~/.codex/AGENTS.md` and `~/.gemini/GEMINI.md`. Cursor and Copilot have no user-wide instruction file, so add them per project |
+| `npx maisongr-skills --dir ../my-app` | Installs into another directory |
+| `npx maisongr-skills --dry-run` | Shows what would change and writes nothing |
+| `npx maisongr-skills` again | Updates to the latest version; unchanged files are left alone |
+| `npx maisongr-skills remove` | Removes the skills, subagents and principles block. Leaves your own content, `CLAUDE.md` and `.gemini/settings.json` in place, and says so |
+| `npx maisongr-skills list` | Lists the skills |
+
+Commit the result so the whole team uses it. The sections below describe each platform's native packaging and the manual steps, if you prefer them.
+
 ## Get the files
 
 The copy-based steps below assume a local clone:

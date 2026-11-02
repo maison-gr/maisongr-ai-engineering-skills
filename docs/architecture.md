@@ -51,6 +51,9 @@ How this repository is organised, and why. Read this before adding a skill, a pl
 | `.claude-plugin/plugin.json` | Claude Code plugin manifest | Claude Code |
 | `.claude-plugin/marketplace.json` | Lists this repository's root as the plugin | Claude Code |
 | `gemini-extension.json` | Gemini CLI extension manifest | Gemini CLI |
+| `package.json` | npm package; publishes only `cli/`, `skills/`, `agents/` and `AGENTS.md` | npm, npx |
+| `cli/maisongr-skills.mjs` | Installer behind `npx maisongr-skills`. Kept out of `bin/` because Claude Code adds a plugin's `bin/` to the shell `PATH` | Users of any agent |
+| `test/` | Installer tests, run with `npm test` | Contributors, CI |
 | `templates/` | Starting points for project instructions and plans | People |
 | `docs/` | Rationale, installation, compatibility, FAQ | People |
 | `scripts/` | Build and validation, Node.js with no dependencies | Contributors, CI |
@@ -80,4 +83,4 @@ It does not check what only a platform can check. For Claude Code, run `claude p
 
 ## Versioning
 
-The version appears in `.claude-plugin/plugin.json`, `gemini-extension.json` and the top entry of `CHANGELOG.md`, and they must match. Claude Code only offers an update when the manifest version changes, so every release bumps it. Renaming or removing a skill, subagent or principle is a breaking change.
+The version appears in `.claude-plugin/plugin.json`, `gemini-extension.json`, `package.json` and the top entry of `CHANGELOG.md`, and they must match. Claude Code only offers an update when the manifest version changes, so every release bumps it. Renaming or removing a skill, subagent or principle is a breaking change.

@@ -62,14 +62,33 @@ On Claude Code and Gemini CLI, three subagents run in their own context: **`mais
 | Platform | Principles | Skills | Install |
 |---|---|---|---|
 | **Claude Code** | `CLAUDE.md` importing `AGENTS.md` | ✓ | Plugin marketplace |
-| **OpenAI Codex** | `AGENTS.md` | ✓ | Copy files |
-| **Cursor** | `AGENTS.md` or project rule | ✓ | Copy files |
-| **GitHub Copilot** | `AGENTS.md` and `copilot-instructions.md` | ✓ | Copy files |
+| **OpenAI Codex** | `AGENTS.md` | ✓ | `npx maisongr-skills` |
+| **Cursor** | `AGENTS.md` or project rule | ✓ | `npx maisongr-skills` |
+| **GitHub Copilot** | `AGENTS.md` and `copilot-instructions.md` | ✓ | `npx maisongr-skills` |
 | **Gemini CLI** | Extension context | ✓ | Extension |
 
 Any other agent that reads [`AGENTS.md`](https://agents.md/) or the [Agent Skills](https://agentskills.io/specification) format can use the same files. Details and sources are in [compatibility](docs/compatibility.md).
 
 ## Quick start
+
+### Any agent, one command
+
+From your project's root:
+
+```bash
+npx maisongr-skills
+```
+
+It adds the principles to `AGENTS.md` (above anything already there), the skills where each agent looks for them, the subagents for Claude Code, and the settings that make Claude Code and Gemini CLI read `AGENTS.md`. It never overwrites your own content, and running it again updates to the latest version.
+
+```bash
+npx maisongr-skills --agent codex,cursor   # only some agents: claude, codex, cursor, copilot, gemini
+npx maisongr-skills --global               # for your user account, every project
+npx maisongr-skills --dry-run              # show what would change
+npx maisongr-skills remove                 # undo
+```
+
+Requires Node.js 18.3 or later. Prefer native packaging? Use the plugin or extension below.
 
 ### Claude Code
 
@@ -101,7 +120,7 @@ gemini extensions install https://github.com/maison-gr/maisongr-ai-engineering-s
 
 ### Codex, Cursor and GitHub Copilot
 
-All three read `AGENTS.md` and skills in `.agents/skills/`. From your project's root:
+All three read `AGENTS.md` and skills in `.agents/skills/`. Use `npx maisongr-skills` above, or copy the files yourself from your project's root:
 
 ```bash
 git clone --depth 1 https://github.com/maison-gr/maisongr-ai-engineering-skills.git ~/maisongr
@@ -171,6 +190,9 @@ maisongr-ai-engineering-skills/
 │   ├── plugin.json                # Claude Code plugin
 │   └── marketplace.json           # Claude Code marketplace
 ├── gemini-extension.json          # Gemini CLI extension
+├── package.json                   # npm package for npx maisongr-skills
+├── cli/maisongr-skills.mjs        # The installer (Node.js, no dependencies)
+├── test/                          # Installer tests
 ├── templates/                     # Project instructions, implementation plan
 ├── docs/                          # Principles, architecture, installation, compatibility, FAQ
 ├── scripts/                       # build.mjs and validate.mjs (Node.js, no dependencies)
