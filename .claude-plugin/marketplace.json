@@ -1,0 +1,16 @@
+{
+  "name": "maison-gr",
+  "description": "Maison GR engineering plugins for Claude Code.",
+  "owner": {
+    "name": "Maison GR",
+    "url": "https://github.com/maison-gr"
+  },
+  "plugins": [
+    {
+      "name": "maisongr",
+      "source": "./",
+      "description": "Engineering skills and subagents that make AI coding agents understand before building, keep changes small, and prove results.",
+      "category": "development"
+    }
+  ]
+}

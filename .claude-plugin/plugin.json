@@ -1,0 +1,14 @@
+{
+  "name": "maisongr",
+  "displayName": "Maison GR Engineering",
+  "version": "1.0.0",
+  "description": "Engineering skills and subagents that make AI coding agents understand before building, keep changes small, and prove results: engineering, architecture, code review, debugging, testing, security, documentation, database, API and frontend.",
+  "author": {
+    "name": "Maison GR",
+    "url": "https://github.com/maison-gr"
+  },
+  "homepage": "https://github.com/maison-gr/maisongr-ai-engineering-skills",
+  "repository": "https://github.com/maison-gr/maisongr-ai-engineering-skills",
+  "license": "MIT",
+  "keywords": ["engineering", "code-review", "testing", "debugging", "security", "architecture", "best-practices"]
+}
