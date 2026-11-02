@@ -1,0 +1,41 @@
+{
+  "name": "maisongr-skills",
+  "version": "1.0.0",
+  "description": "Engineering discipline for AI coding agents: seven principles and ten skills for Claude Code, Codex, Cursor, GitHub Copilot and Gemini CLI.",
+  "keywords": [
+    "agent-skills",
+    "agents-md",
+    "claude-code",
+    "codex",
+    "cursor",
+    "github-copilot",
+    "gemini-cli",
+    "code-review",
+    "engineering"
+  ],
+  "homepage": "https://github.com/maison-gr/maisongr-ai-engineering-skills#readme",
+  "bugs": "https://github.com/maison-gr/maisongr-ai-engineering-skills/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maison-gr/maisongr-ai-engineering-skills.git"
+  },
+  "license": "MIT",
+  "author": "Maison GR (https://www.maisongr.com)",
+  "bin": {
+    "maisongr-skills": "cli/maisongr-skills.mjs"
+  },
+  "files": [
+    "cli/",
+    "skills/",
+    "agents/",
+    "AGENTS.md"
+  ],
+  "engines": {
+    "node": ">=18.3"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "validate": "node scripts/validate.mjs",
+    "test": "node --test"
+  }
+}
