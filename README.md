@@ -1,28 +1,79 @@
-# Maison GR AI Engineering Skills
+<p align="center">
+  <img src=".github/social-preview.png" alt="Maison GR AI Engineering Skills: seven principles and ten skills for AI coding agents" width="720">
+</p>
 
-**Engineering discipline for AI coding agents.** Seven principles and ten skills that make agents understand before they build, keep changes small, and prove their work, in Claude Code, OpenAI Codex, Cursor, GitHub Copilot and Gemini CLI.
+<h1 align="center">One engineering standard for every AI coding agent</h1>
 
-[![Validate](https://github.com/maison-gr/maisongr-ai-engineering-skills/actions/workflows/validate.yml/badge.svg)](https://github.com/maison-gr/maisongr-ai-engineering-skills/actions/workflows/validate.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+<p align="center">
+  Agents that ask before guessing, change only what you asked,<br>
+  and tell you exactly what they did <em>not</em> verify.
+</p>
+
+<p align="center">
+  Claude Code · OpenAI Codex · Cursor · GitHub Copilot · Gemini CLI
+</p>
+
+<p align="center">
+  <a href="https://github.com/maison-gr/maisongr-ai-engineering-skills/actions/workflows/validate.yml"><img src="https://github.com/maison-gr/maisongr-ai-engineering-skills/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
+</p>
+
+```bash
+npx maisongr-skills
+```
 
 ---
 
-## The problem
+## Why this exists
 
-AI coding agents are fast and fluent, so their mistakes look finished. The common ones:
+AI coding agents rarely fail for lack of knowledge. They fail because finishing the task pulls harder than doing it right. So they:
 
-- They fill gaps in a request with confident guesses instead of asking.
-- They build abstractions and options the task never needed.
-- They "improve" files nobody asked them to touch.
-- They stop when the code is written, not when it works.
-- They report tests as passing without running them.
-- They take actions that cannot be undone: a push, a dropped column, a broken public API.
+- guess what you meant instead of asking;
+- build abstractions and options the task never needed;
+- "improve" files nobody mentioned;
+- report "all tests pass" without running them;
+- push, drop a column or break a public API when nobody asked them to.
 
-None of these is a knowledge problem. The model knows the right practice; it does not apply it under the pull of finishing the task. Maison GR makes that practice the default.
+And when your team uses three different agents, you get three different standards, or none.
+
+Maison GR gives every agent the same seven principles and ten task methods, from one source file, installed with one command.
+
+## 60 seconds
+
+1. In any project, run `npx maisongr-skills`.
+2. Ask your agent for something slightly ambiguous: *"Add caching to the users endpoint."*
+3. Instead of guessing, it asks what to cache and for how long, or states the assumptions it made.
+4. When it finishes, it reports what it did and what it could not check. For example:
+
+```text
+Changed:      src/api/users.ts: added a 60 s cache to GET /users
+Verified:     npm test (42 passed), npm run lint (clean)
+Not verified: cache invalidation under concurrent writes (no integration environment)
+Decisions:    chose in-memory over Redis; revisit if you run more than one instance
+```
+
+Undo it any time with `npx maisongr-skills remove`.
+
+## How it works
+
+```mermaid
+flowchart LR
+    N["npx maisongr-skills"] ==> A
+    A["AGENTS.md<br/>7 principles, always on"] --> C[Claude Code]
+    A --> X[Codex]
+    A --> U[Cursor]
+    A --> P[Copilot]
+    A --> G[Gemini CLI]
+    S["10 skills<br/>loaded on demand"] -.-> C & X & U & P & G
+```
+
+- **Principles** are short, always-on instructions in `AGENTS.md`, the file most agents already read. About 6 KB.
+- **Skills** are detailed methods an agent loads only when a task matches, in the open [Agent Skills](https://agentskills.io/specification) format.
+- **Subagents** (Claude Code and Gemini CLI) run review, design and testing in their own context.
+
+The installer writes each piece where each agent natively looks for it. It adds the principles in a marked block above your existing `AGENTS.md`, updates only that block on later runs, and removes only what it added.
 
 ## The principles
-
-Loaded into every session through [`AGENTS.md`](AGENTS.md):
 
 | # | Principle | Prevents |
 |---|---|---|
@@ -34,13 +85,18 @@ Loaded into every session through [`AGENTS.md`](AGENTS.md):
 | 6 | **Secure by default** | Vulnerabilities in code that works |
 | 7 | **Guard irreversible actions** | Damage another edit cannot undo |
 
-Every task follows the same loop: **inspect, clarify, plan, implement, verify, report.**
+Every task follows the same loop:
 
-[Read the reasoning behind each principle](docs/principles.md) · [See them in action](EXAMPLES.md)
+```mermaid
+flowchart LR
+    I[Inspect] --> Q[Clarify] --> P[Plan] --> M[Implement] --> V[Verify] --> R[Report]
+    Q -- ambiguous --> Ask((Ask you))
+    V -- fails --> M
+```
+
+[The reasoning behind each principle](docs/principles.md) · [Each one in a realistic scenario](EXAMPLES.md)
 
 ## The skills
-
-Detailed methods that agents load only when a task needs them:
 
 | Skill | Use it for |
 |---|---|
@@ -55,169 +111,56 @@ Detailed methods that agents load only when a task needs them:
 | [`maisongr-api`](skills/maisongr-api/SKILL.md) | API contracts, validation, consistent errors, compatible evolution |
 | [`maisongr-frontend`](skills/maisongr-frontend/SKILL.md) | Accessible (WCAG 2.2 AA), responsive, fast, finished interfaces |
 
-On Claude Code and Gemini CLI, three subagents run in their own context: **`maisongr-architect`** (read-only design and planning), **`maisongr-reviewer`** (independent read-only review) and **`maisongr-tester`** (tests only).
+Agents pick a skill up when a request matches it. *"Users say the CSV import drops rows"* loads `maisongr-debugging`: reproduce, find the root cause, fix, add a regression test. To call one directly: `/maisongr:maisongr-security-review` in Claude Code, `$maisongr-security-review` in Codex.
 
-## Supported platforms
+## Install
 
-| Platform | Principles | Skills | Install |
-|---|---|---|---|
-| **Claude Code** | `CLAUDE.md` importing `AGENTS.md` | ✓ | Plugin marketplace |
-| **OpenAI Codex** | `AGENTS.md` | ✓ | `npx maisongr-skills` |
-| **Cursor** | `AGENTS.md` or project rule | ✓ | `npx maisongr-skills` |
-| **GitHub Copilot** | `AGENTS.md` and `copilot-instructions.md` | ✓ | `npx maisongr-skills` |
-| **Gemini CLI** | Extension context | ✓ | Extension |
-
-Any other agent that reads [`AGENTS.md`](https://agents.md/) or the [Agent Skills](https://agentskills.io/specification) format can use the same files. Details and sources are in [compatibility](docs/compatibility.md).
-
-## Quick start
-
-### Any agent, one command
-
-From your project's root:
+**Any agent, one command** (Node.js 18.3 or later), from your project's root:
 
 ```bash
-npx maisongr-skills
+npx maisongr-skills                       # all five agents
+npx maisongr-skills --agent codex,cursor  # only some: claude, codex, cursor, copilot, gemini
+npx maisongr-skills --global              # your user account, every project
+npx maisongr-skills --dry-run             # show what would change
+npx maisongr-skills remove                # undo
 ```
 
-It adds the principles to `AGENTS.md` (above anything already there), the skills where each agent looks for them, the subagents for Claude Code, and the settings that make Claude Code and Gemini CLI read `AGENTS.md`. It never overwrites your own content, and running it again updates to the latest version.
+Commit the result so your whole team, and every agent, works to the same standard.
 
-```bash
-npx maisongr-skills --agent codex,cursor   # only some agents: claude, codex, cursor, copilot, gemini
-npx maisongr-skills --global               # for your user account, every project
-npx maisongr-skills --dry-run              # show what would change
-npx maisongr-skills remove                 # undo
-```
-
-Requires Node.js 18.3 or later. Prefer native packaging? Use the plugin or extension below.
-
-### Claude Code
-
-Run these two commands inside Claude Code:
+**Claude Code plugin**, inside Claude Code:
 
 ```text
 /plugin marketplace add maison-gr/maisongr-ai-engineering-skills
 /plugin install maisongr@maison-gr
 ```
 
-On Claude Code 2.1.275 or later, one command does both: `/plugin install maisongr --marketplace maison-gr/maisongr-ai-engineering-skills`.
-
-This installs the skills and subagents for **all your projects**. To share them with everyone who works on one repository instead, install from a terminal into the project scope, which records the plugin in the repository's committed `.claude/settings.json`:
-
-```bash
-claude plugin marketplace add maison-gr/maisongr-ai-engineering-skills
-claude plugin install maisongr@maison-gr --scope project
-```
-
-Then add the always-on principles, which a plugin cannot install: copy [`AGENTS.md`](AGENTS.md) into the project root and put `@AGENTS.md` in its `CLAUDE.md`. To apply them to every project in a folder, put the import in a `CLAUDE.md` in that parent folder instead, for example `@path/to/AGENTS.md`.
-
-Updates: `claude plugin marketplace update maison-gr`, then `claude plugin update maisongr@maison-gr`. Removal: `claude plugin uninstall maisongr@maison-gr`.
-
-### Gemini CLI
+**Gemini CLI extension:**
 
 ```bash
 gemini extensions install https://github.com/maison-gr/maisongr-ai-engineering-skills
 ```
 
-### Codex, Cursor and GitHub Copilot
+The plugin and extension install the skills and subagents; for the always-on principles in Claude Code, also run `npx maisongr-skills --agent claude` or add `@AGENTS.md` to your `CLAUDE.md`. The [installation guide](docs/installation.md) covers project and user scopes, manual copying, updates and removal on every platform.
 
-All three read `AGENTS.md` and skills in `.agents/skills/`. Use `npx maisongr-skills` above, or copy the files yourself from your project's root:
+## Make it yours
 
-```bash
-git clone --depth 1 https://github.com/maison-gr/maisongr-ai-engineering-skills.git ~/maisongr
-cp ~/maisongr/AGENTS.md AGENTS.md
-mkdir -p .agents/skills && cp -R ~/maisongr/skills/maisongr-* .agents/skills/
-```
-
-```powershell
-git clone --depth 1 https://github.com/maison-gr/maisongr-ai-engineering-skills.git "$HOME\maisongr"
-Copy-Item "$HOME\maisongr\AGENTS.md" AGENTS.md
-New-Item -ItemType Directory -Force .agents\skills | Out-Null
-Copy-Item -Recurse "$HOME\maisongr\skills\maisongr-*" .agents\skills\
-```
-
-If your project already has an `AGENTS.md`, add the principles at the top instead of overwriting it. For Copilot, also copy [`.github/copilot-instructions.md`](.github/copilot-instructions.md).
-
-The [installation guide](docs/installation.md) covers every platform in detail, including user-wide installs, updates and removal.
-
-## Usage
-
-Once installed, work as usual. The principles apply to every task, and agents pick up skills when a request matches them:
-
-> *"Users say the CSV import drops rows. Find out why."* → `maisongr-debugging`: reproduce, find the root cause, fix, add a regression test.
->
-> *"Review my changes before I open the PR."* → `maisongr-code-review`: findings ranked by severity, each with a failure scenario.
->
-> *"Add a `discount_code` column to orders."* → `maisongr-database`: expand-and-contract migration with a rollback.
-
-Invoke a skill explicitly when you want it for certain: `/maisongr:maisongr-security-review` in Claude Code, `$maisongr-security-review` in Codex.
-
-At the end of a task, expect a report like this:
-
-```text
-Changed:      the files and what changed in each
-Verified:     the commands run and their results
-Not verified: what could not be checked, and why
-Decisions:    assumptions and trade-offs to review
-```
-
-## Customisation
-
-The principles are defaults, written to be adapted:
-
-- **Make them concrete.** Add a project section to `AGENTS.md` with your commands, conventions and boundaries. Start from [`templates/project-instructions.md`](templates/project-instructions.md). Specific project instructions take precedence over the general principles.
+- **Add your project's specifics.** Put your commands, conventions and boundaries below the Maison GR block in `AGENTS.md`, starting from [`templates/project-instructions.md`](templates/project-instructions.md). Specific instructions take precedence over the general principles.
 - **Plan bigger changes.** Ask the agent to fill in [`templates/implementation-plan.md`](templates/implementation-plan.md) and wait for your approval.
-- **Pick your skills.** Each skill folder is self-contained. Copy only the ones your team needs.
-- **Scope rules to files.** With Copilot, add `.github/instructions/*.instructions.md` with an `applyTo` glob; with Cursor, add a rule with `globs`.
+- **Pick your skills.** Each skill folder is self-contained; keep only the ones your team needs.
 
-## Repository structure
+## Agent still got it wrong?
 
-```text
-maisongr-ai-engineering-skills/
-├── AGENTS.md                      # The principles: the single source
-├── CLAUDE.md                      # Imports AGENTS.md for Claude Code
-├── GEMINI.md                      # Generated from AGENTS.md (Gemini extension context)
-├── .cursor/rules/
-│   └── maisongr-engineering.mdc   # Generated from AGENTS.md (Cursor rule)
-├── .github/
-│   ├── copilot-instructions.md    # Generated from AGENTS.md (Copilot)
-│   ├── workflows/validate.yml     # CI
-│   ├── ISSUE_TEMPLATE/
-│   └── PULL_REQUEST_TEMPLATE.md
-├── skills/                        # Ten skills, Agent Skills format
-│   └── maisongr-*/SKILL.md
-├── agents/                        # Three subagents (Claude Code, Gemini CLI)
-├── .claude-plugin/
-│   ├── plugin.json                # Claude Code plugin
-│   └── marketplace.json           # Claude Code marketplace
-├── gemini-extension.json          # Gemini CLI extension
-├── package.json                   # npm package for npx maisongr-skills
-├── cli/maisongr-skills.mjs        # The installer (Node.js, no dependencies)
-├── test/                          # Installer tests
-├── templates/                     # Project instructions, implementation plan
-├── docs/                          # Principles, architecture, installation, compatibility, FAQ
-├── scripts/                       # build.mjs and validate.mjs (Node.js, no dependencies)
-├── EXAMPLES.md                    # Each principle in a realistic scenario
-├── RESEARCH.md                    # What informed the design
-├── CONTRIBUTING.md
-├── CHANGELOG.md
-└── LICENSE
-```
+If an agent with Maison GR installed still guessed, over-built, touched files it should not have, or claimed checks it never ran, [send us the transcript](https://github.com/maison-gr/maisongr-ai-engineering-skills/issues/new?template=agent-failure-report.md). Each report becomes a test case for the next release.
 
-Why it is shaped this way: [architecture](docs/architecture.md).
+To contribute a fix, a skill or a new platform, read [CONTRIBUTING](CONTRIBUTING.md). How the repository is built: [architecture](docs/architecture.md).
 
-## Contributing
+## Credits
 
-Contributions are welcome, especially fixes to installation steps and guidance that leads agents astray. Read [CONTRIBUTING](CONTRIBUTING.md), then run `node scripts/validate.mjs` before opening a pull request. Propose new skills with an issue first.
+Maison GR started from [andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) and its four principles for LLM coding agents. It adds principles for verification, security and irreversible actions, ten task skills, subagents, one generated source for five platforms, and an installer. [RESEARCH.md](RESEARCH.md) lists every project and document that informed the design.
 
 ## Further reading
 
-- [Principles in depth](docs/principles.md)
-- [Examples](EXAMPLES.md)
-- [Installation](docs/installation.md)
-- [Compatibility](docs/compatibility.md)
-- [FAQ](docs/faq.md)
-- [Research](RESEARCH.md)
-- [Changelog](CHANGELOG.md)
+[Principles](docs/principles.md) · [Examples](EXAMPLES.md) · [Installation](docs/installation.md) · [Compatibility](docs/compatibility.md) · [FAQ](docs/faq.md) · [Architecture](docs/architecture.md) · [Changelog](CHANGELOG.md)
 
 ## License
 
