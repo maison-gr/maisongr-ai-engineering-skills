@@ -18,3 +18,26 @@ jobs:
           node-version: 22
       - name: Check skills, manifests, generated files and links
         run: node scripts/validate.mjs
+
+  cli:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: [18, 22]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - name: Unit tests
+        run: npm test
+      - name: Install the packed tarball with npx, as a user would
+        shell: bash
+        run: |
+          npm pack --pack-destination "$RUNNER_TEMP"
+          mkdir "$RUNNER_TEMP/app" && cd "$RUNNER_TEMP/app"
+          npx --yes --package "$(ls "$RUNNER_TEMP"/maisongr-skills-*.tgz)" maisongr-skills
+          test -f AGENTS.md
+          test -f .agents/skills/maisongr-engineering/SKILL.md
+          test -f .claude/agents/maisongr-reviewer.md

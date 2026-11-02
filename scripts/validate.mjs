@@ -87,6 +87,7 @@ const released = read("CHANGELOG.md").match(/^## \[(\d+\.\d+\.\d+)\]/m)?.[1];
 for (const [path, version] of [
   [".claude-plugin/plugin.json", plugin.version],
   ["gemini-extension.json", gemini.version],
+  ["package.json", json("package.json").version],
 ]) {
   if (version !== released) fail(path, `version ${version} does not match CHANGELOG.md (${released})`);
 }
