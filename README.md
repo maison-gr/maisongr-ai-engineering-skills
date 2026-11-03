@@ -55,6 +55,22 @@ Decisions:    chose in-memory over Redis; revisit if you run more than one insta
 
 Undo it any time with `npx maisongr-skills remove`.
 
+## Receipts: "tests pass" you can check
+
+An agent can write "Verified: `npm test` (42 passed)" without having run anything. With the Claude Code plugin installed, Maison GR checks.
+
+- Every shell command the agent runs in a session is recorded, with its exit code.
+- When the agent tries to finish, each command listed under **Verified** is checked against that record.
+- If a command never ran, or its last run failed while the report says it passed, the agent is sent back to run it and report the real result, or to move it to **Not verified**.
+
+```text
+Maison GR receipts: your report lists commands under "Verified" that this session's record does not support:
+- `npm test`: no command like this ran in this session.
+Run them now and report the real result, or move them to "Not verified" with the reason.
+```
+
+It checks only command names in backticks, never blocks twice in a row, and keeps its record on your machine, in Claude Code's plugin data folder. Receipts need the [Claude Code plugin](#install); other agents get the same report format without the check.
+
 ## How it works
 
 ```mermaid

@@ -88,7 +88,7 @@ Commit these files so the whole team, and every agent, uses the same standard.
 
 ### Plugin (recommended)
 
-The plugin installs all ten skills and three subagents (`maisongr-architect`, `maisongr-reviewer`, `maisongr-tester`), and keeps them updated.
+The plugin installs all ten skills, three subagents (`maisongr-architect`, `maisongr-reviewer`, `maisongr-tester`) and the receipts check, which compares the commands an agent lists under "Verified" with the commands it actually ran. It keeps them updated.
 
 Inside Claude Code:
 

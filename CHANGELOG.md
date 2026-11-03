@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format follows [Kee
 
 What counts as breaking: renaming or removing a skill, subagent or principle, or changing an installation path. Rewording guidance is a minor or patch change.
 
+## [Unreleased]
+
+### Added
+
+- Receipts for Claude Code: the plugin records the shell commands run in a session and, before the agent stops, checks every command listed under "Verified" in its report. A command that never ran, or whose last run failed while the report says it passed, sends the agent back to run it or move it to "Not verified".
+
+### Changed
+
+- The reporting principle asks agents to write each verified command in backticks, so the report can be checked.
+
 ## [1.0.0] - 2026-11-02
 
 ### Added
