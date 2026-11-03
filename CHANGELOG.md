@@ -4,6 +4,12 @@ All notable changes to this project are documented here. The format follows [Kee
 
 What counts as breaking: renaming or removing a skill, subagent or principle, or changing an installation path. Rewording guidance is a minor or patch change.
 
+## [Unreleased]
+
+### Added
+
+- Security policy, code of conduct and support guide. Questions now go to Discussions, and vulnerabilities to private reporting.
+
 ## [1.1.0] - 2026-11-02
 
 ### Added

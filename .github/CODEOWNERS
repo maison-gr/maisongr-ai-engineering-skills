@@ -1,0 +1,5 @@
+# Maintainers who are asked to review every change.
+# Do not make code-owner review required while there is a single maintainer:
+# GitHub does not let authors approve their own pull requests.
+
+* @fadhlaouir
