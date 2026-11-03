@@ -1,7 +1,7 @@
 {
   "name": "maisongr",
   "displayName": "Maison GR Engineering",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Engineering skills and subagents that make AI coding agents understand before building, keep changes small, and prove results: engineering, architecture, code review, debugging, testing, security, documentation, database, API and frontend.",
   "author": {
     "name": "Maison GR",

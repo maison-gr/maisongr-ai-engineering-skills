@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 What counts as breaking: renaming or removing a skill, subagent or principle, or changing an installation path. Rewording guidance is a minor or patch change.
 
-## [Unreleased]
+## [1.1.0] - 2026-11-02
 
 ### Added
 
