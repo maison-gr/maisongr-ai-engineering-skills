@@ -118,7 +118,7 @@ Maintainers release by:
 1. Moving `[Unreleased]` entries under a new version heading in `CHANGELOG.md`.
 2. Setting the same version in `.claude-plugin/plugin.json`, `gemini-extension.json` and `package.json`. The validator checks that all four match.
 3. Running `node scripts/validate.mjs` and `npm test`, and checking the package contents with `npm pack --dry-run`.
-4. Tagging the release (`git tag v1.2.0`), pushing it, and publishing to npm with `npm publish`.
+4. Tagging the release (`git tag v1.2.0`), pushing it, and publishing a GitHub release for the tag. The [release workflow](.github/workflows/release.yml) then publishes to npm with provenance; nobody publishes from a local machine.
 
 Claude Code users receive an update only when the version changes; npx users get the new version on their next run.
 
