@@ -3,7 +3,7 @@
 //   node scripts/build.mjs          write the generated files
 //   node scripts/build.mjs --check  exit 1 if any generated file is out of date
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -35,13 +35,23 @@ export function outputs() {
   };
 }
 
+// Reads in one step, so the file can't change between a check and the read.
+function readIfExists(path) {
+  try {
+    return read(path);
+  } catch (error) {
+    if (error.code === "ENOENT") return null;
+    throw error;
+  }
+}
+
 function main() {
   const check = process.argv.includes("--check");
   const stale = [];
 
   for (const [path, content] of Object.entries(outputs())) {
     const target = join(root, path);
-    const current = existsSync(target) ? read(path) : null;
+    const current = readIfExists(path);
     if (current === content) continue;
     if (check) {
       stale.push(path);
