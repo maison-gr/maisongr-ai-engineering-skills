@@ -6,9 +6,16 @@ What counts as breaking: renaming or removing a skill, subagent or principle, or
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-11-03
+
 ### Added
 
 - Security policy, code of conduct and support guide. Questions now go to Discussions, and vulnerabilities to private reporting.
+- The npm package is published from GitHub releases with a provenance attestation.
+
+### Fixed
+
+- The build reads generated files in one step, so a file can't change between the check and the read.
 
 ## [1.1.0] - 2026-11-02
 
