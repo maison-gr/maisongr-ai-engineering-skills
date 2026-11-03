@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/social-preview.png" alt="Maison GR AI Engineering Skills: seven principles and ten skills for AI coding agents" width="720">
+  <img src="https://raw.githubusercontent.com/maison-gr/maisongr-ai-engineering-skills/main/.github/social-preview.png" alt="Maison GR AI Engineering Skills: seven principles and ten skills for AI coding agents" width="720">
 </p>
 
 <h1 align="center">One engineering standard for every AI coding agent</h1>
@@ -15,6 +15,7 @@
 
 <p align="center">
   <a href="https://github.com/maison-gr/maisongr-ai-engineering-skills/actions/workflows/validate.yml"><img src="https://github.com/maison-gr/maisongr-ai-engineering-skills/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
+  <a href="https://www.npmjs.com/package/maisongr-skills"><img src="https://img.shields.io/npm/v/maisongr-skills.svg" alt="npm version"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
 </p>
 
