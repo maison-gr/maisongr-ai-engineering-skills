@@ -82,6 +82,6 @@ Inspect, clarify, plan, implement, verify, report.
 End each task with:
 
 1. **Changed:** the files and what changed in each.
-2. **Verified:** the commands you ran and their results.
+2. **Verified:** the commands you ran, each in backticks, and their results.
 3. **Not verified:** what you could not check, and why.
 4. **Decisions:** assumptions and trade-offs the developer should review.

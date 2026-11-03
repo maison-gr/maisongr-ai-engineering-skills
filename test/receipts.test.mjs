@@ -1,0 +1,82 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { mkdtempSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const script = fileURLToPath(new URL("../receipts/receipts.mjs", import.meta.url));
+
+function session() {
+  const data = mkdtempSync(join(tmpdir(), "maisongr-receipts-"));
+  const id = "test-session";
+  const hook = (mode, input) => {
+    const result = spawnSync(process.execPath, [script, mode], {
+      input: JSON.stringify({ session_id: id, ...input }),
+      env: { ...process.env, CLAUDE_PLUGIN_DATA: data },
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 0, result.stderr);
+    return result.stdout;
+  };
+  return {
+    ran: (command) => hook("record", { hook_event_name: "PostToolUse", tool_name: "Bash", tool_input: { command } }),
+    failed: (command, code) =>
+      hook("record", {
+        hook_event_name: "PostToolUseFailure",
+        tool_name: "Bash",
+        tool_input: { command },
+        error: `Exit code ${code}\nsome output`,
+      }),
+    stop: (message, extra = {}) => {
+      const out = hook("check", { hook_event_name: "Stop", stop_hook_active: false, last_assistant_message: message, ...extra });
+      return out ? JSON.parse(out) : null;
+    },
+  };
+}
+
+const report = (verified) =>
+  `Done.\n\n**Changed:** src/app.ts\n**Verified:** ${verified}\n**Not verified:** \`npm run e2e\` (no browser here)\n**Decisions:** none`;
+
+test("lets the agent stop when every verified command ran and passed", () => {
+  const s = session();
+  s.ran("npm test");
+  s.ran("cd web && npm run lint");
+  assert.equal(s.stop(report("`npm test` (42 passed), `npm run lint` clean")), null);
+});
+
+test("blocks a verified command that never ran", () => {
+  const s = session();
+  s.ran("npm run lint");
+  const result = s.stop(report("`npm test` (42 passed)"));
+  assert.equal(result.decision, "block");
+  assert.match(result.reason, /`npm test`: no command like this ran/);
+});
+
+test("blocks a command reported as passing when it failed", () => {
+  const s = session();
+  s.failed("npm test", 1);
+  const result = s.stop(report("`npm test` passed"));
+  assert.equal(result.decision, "block");
+  assert.match(result.reason, /`npm test`: the last time it ran, it exited with code 1/);
+});
+
+test("accepts a failure the report admits, and a later passing run", () => {
+  const s = session();
+  s.failed("npm test", 1);
+  assert.equal(s.stop(report("`npm test` failed: 2 of 42 tests fail on main too")), null);
+  s.ran("npm test");
+  assert.equal(s.stop(report("`npm test` (42 passed)")), null);
+});
+
+test("ignores file names, prose and the Not verified section", () => {
+  const s = session();
+  assert.equal(s.stop(report("checked `src/app.ts` by reading it; output matches `README.md`")), null);
+});
+
+test("stays silent without a report, and never blocks twice in a row", () => {
+  const s = session();
+  assert.equal(s.stop("Here is the answer to your question."), null);
+  assert.equal(s.stop(report("`npm test` passed"), { stop_hook_active: true }), null);
+});

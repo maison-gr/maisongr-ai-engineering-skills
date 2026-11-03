@@ -10,5 +10,6 @@
   "homepage": "https://github.com/maison-gr/maisongr-ai-engineering-skills",
   "repository": "https://github.com/maison-gr/maisongr-ai-engineering-skills",
   "license": "MIT",
+  "hooks": "./receipts/hooks.json",
   "keywords": ["engineering", "code-review", "testing", "debugging", "security", "architecture", "best-practices"]
 }
