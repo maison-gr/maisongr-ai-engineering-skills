@@ -6,6 +6,8 @@ What counts as breaking: renaming or removing a skill, subagent or principle, or
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-03
+
 ### Added
 
 - Receipts now also checks guarded, often irreversible Git actions. If a session force-pushed, skipped Git hooks with `--no-verify`, staged everything with `git add -A`, rewrote history (amend, rebase, reset `--hard`), or changed Git config, and the report never mentions it, the agent is sent back to disclose and justify the action or undo it. Deterministic, from the same session record, with no extra model calls.
