@@ -67,6 +67,49 @@ export function checkClaims(message, runs) {
   return problems;
 }
 
+// Guarded, often irreversible Git actions (see "Guard irreversible actions"). Each is allowed
+// only when the user asked for it in this conversation. The record can't know whether they did,
+// but it can make sure the agent owned the action in its report: if one ran and the report never
+// mentions it, the agent is sent back to disclose and justify it, or undo it.
+const GUARDRAILS = [
+  {
+    what: "force-pushed",
+    test: /\bgit\s+push\b[^\n]*(--force(-with-lease)?\b|\s-f\b)/i,
+    ack: /force[- ]?push|--force|-f\b/i,
+  },
+  {
+    what: "skipped Git hooks with --no-verify",
+    test: /\bgit\s+(commit|push)\b[^\n]*(--no-verify\b|\s-n\b)/i,
+    ack: /no-verify|skip\w*\s+hook|hook\w*\s+skip/i,
+  },
+  {
+    what: "staged everything instead of by name (git add -A / .)",
+    test: /\bgit\s+add\s+(-A\b|--all\b|\.(?=\s|$))/i,
+    ack: /add\s+(-a\b|--all\b|\.)/i,
+  },
+  {
+    what: "rewrote history (amend / rebase / reset --hard)",
+    test: /\bgit\s+(commit[^\n]*--amend\b|rebase\b|reset[^\n]*--hard\b)/i,
+    ack: /amend|rebase|reset[^\n]*--hard/i,
+  },
+  {
+    what: "changed Git config",
+    test: /\bgit\s+config\s+(?:--(?:global|local|system)\s+)?[\w.]+\s+["']?\S/i,
+    ack: /git\s+config|config\w*\s+(chang|set|updat)/i,
+  },
+];
+
+export function checkGuardrails(message, runs) {
+  const text = String(message ?? "");
+  const problems = [];
+  for (const rule of GUARDRAILS) {
+    const hit = runs.find((run) => rule.test.test(run.command));
+    if (!hit || rule.ack.test(text)) continue;
+    problems.push(`this session ${rule.what} (\`${normalise(hit.command)}\`) but your report never mentions it.`);
+  }
+  return problems;
+}
+
 function logFile(sessionId) {
   const dir = join(process.env.CLAUDE_PLUGIN_DATA || tmpdir(), "receipts");
   mkdirSync(dir, { recursive: true });
@@ -92,14 +135,28 @@ function record(input) {
 function check(input) {
   // Block once at most: if the agent was already sent back, let it stop.
   if (input.stop_hook_active) return;
-  const problems = checkClaims(input.last_assistant_message, readRuns(logFile(input.session_id)));
-  if (problems.length === 0) return;
-  const reason = [
-    "Maison GR receipts: your report lists commands under \"Verified\" that this session's record does not support:",
-    ...problems.map((problem) => `- ${problem}`),
-    "Run them now and report the real result, or move them to \"Not verified\" with the reason.",
-  ].join("\n");
-  process.stdout.write(JSON.stringify({ decision: "block", reason }));
+  const message = input.last_assistant_message;
+  const runs = readRuns(logFile(input.session_id));
+  const claims = checkClaims(message, runs);
+  const guardrails = checkGuardrails(message, runs);
+  if (claims.length === 0 && guardrails.length === 0) return;
+  const parts = [];
+  if (claims.length) {
+    parts.push(
+      "Maison GR receipts: your report lists commands under \"Verified\" that this session's record does not support:",
+      ...claims.map((problem) => `- ${problem}`),
+      "Run them now and report the real result, or move them to \"Not verified\" with the reason.",
+    );
+  }
+  if (guardrails.length) {
+    if (parts.length) parts.push("");
+    parts.push(
+      "Maison GR receipts: this session took a guarded action without owning it in the report:",
+      ...guardrails.map((problem) => `- ${problem}`),
+      "Each is allowed only if the user asked for it here. Say so and justify it in your report, or undo it.",
+    );
+  }
+  process.stdout.write(JSON.stringify({ decision: "block", reason: parts.join("\n") }));
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

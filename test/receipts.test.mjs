@@ -80,3 +80,45 @@ test("stays silent without a report, and never blocks twice in a row", () => {
   assert.equal(s.stop("Here is the answer to your question."), null);
   assert.equal(s.stop(report("`npm test` passed"), { stop_hook_active: true }), null);
 });
+
+test("blocks a force-push the report doesn't mention", () => {
+  const s = session();
+  s.ran("git push --force origin fix/foo");
+  const result = s.stop(report("reviewed the diff"));
+  assert.equal(result.decision, "block");
+  assert.match(result.reason, /force-pushed/);
+});
+
+test("allows a guarded action the report owns", () => {
+  const s = session();
+  s.ran("git push --force origin fix/foo");
+  assert.equal(s.stop(report("force-pushed to update the PR, as you asked")), null);
+});
+
+test("blocks blind staging the report doesn't mention", () => {
+  const s = session();
+  s.ran("git add -A");
+  const result = s.stop(report("committed the change"));
+  assert.equal(result.decision, "block");
+  assert.match(result.reason, /staged everything/);
+});
+
+test("flags --no-verify, history rewrites and git config changes", () => {
+  const s = session();
+  s.ran("git commit --no-verify -m wip");
+  s.ran("git commit --amend -m fix");
+  s.ran('git config user.email "x@y.z"');
+  const result = s.stop(report("done"));
+  assert.equal(result.decision, "block");
+  assert.match(result.reason, /--no-verify/);
+  assert.match(result.reason, /rewrote history/);
+  assert.match(result.reason, /changed Git config/);
+});
+
+test("does not flag staging by name, a plain commit, or a config read", () => {
+  const s = session();
+  s.ran("git add src/app.ts test/app.test.ts");
+  s.ran("git commit -m 'fix: thing'");
+  s.ran("git config user.name");
+  assert.equal(s.stop(report("committed the fix")), null);
+});

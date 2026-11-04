@@ -69,7 +69,15 @@ Maison GR receipts: your report lists commands under "Verified" that this sessio
 Run them now and report the real result, or move them to "Not verified" with the reason.
 ```
 
-It checks only command names in backticks, never blocks twice in a row, and keeps its record on your machine, in Claude Code's plugin data folder. Receipts need the [Claude Code plugin](#install); other agents get the same report format without the check.
+The same record catches **guarded actions taken silently** (see principle 7, _Guard irreversible actions_). If the session force-pushed, skipped Git hooks with `--no-verify`, staged everything with `git add -A`, rewrote history (amend, rebase, reset `--hard`), or changed Git config, and the report never mentions it, the agent is sent back to own and justify the action — or undo it.
+
+```text
+Maison GR receipts: this session took a guarded action without owning it in the report:
+- this session force-pushed (`git push --force origin fix/foo`) but your report never mentions it.
+Each is allowed only if the user asked for it here. Say so and justify it in your report, or undo it.
+```
+
+It checks only command names in backticks (and the guarded Git actions above), never blocks twice in a row, and keeps its record on your machine, in Claude Code's plugin data folder. Receipts need the [Claude Code plugin](#install); other agents get the same report format without the check.
 
 ## How it works
 
