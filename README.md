@@ -62,6 +62,7 @@ An agent can write "Verified: `npm test` (42 passed)" without having run anythin
 - Every shell command the agent runs in a session is recorded, with its exit code.
 - When the agent tries to finish, each command listed under **Verified** is checked against that record.
 - If a command never ran, or its last run failed while the report says it passed, the agent is sent back to run it and report the real result, or to move it to **Not verified**.
+- It also catches **guarded, irreversible actions the report doesn't own** — a force-push, `git add -A`, a history rewrite, a `--no-verify`, or a Git config change — and sends the agent back to disclose and justify them, or undo them.
 
 ```text
 Maison GR receipts: your report lists commands under "Verified" that this session's record does not support:
