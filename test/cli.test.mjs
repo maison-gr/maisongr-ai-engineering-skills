@@ -14,7 +14,9 @@ function project() {
 }
 
 function run(args, { cwd, home } = {}) {
-  const env = { ...process.env };
+  // Plain text whatever runs the tests: GitHub Actions turns colour on for its own log.
+  const env = { ...process.env, NO_COLOR: "1" };
+  delete env.FORCE_COLOR;
   if (home) Object.assign(env, { HOME: home, USERPROFILE: home });
   const result = spawnSync(process.execPath, [cli, ...args], { cwd, env, encoding: "utf8" });
   return { code: result.status, out: result.stdout, err: result.stderr };
@@ -205,7 +207,7 @@ test("colour on a terminal only: off when piped, NO_COLOR or --no-color, on with
   const ESC = "\u001b[";
   const env = (extra) => {
     const e = { ...process.env, ...extra };
-    for (const k of ["FORCE_COLOR", "NO_COLOR"]) if (!(k in extra)) delete e[k];
+    for (const k of ["FORCE_COLOR", "NO_COLOR", "GITHUB_ACTIONS"]) if (!(k in extra)) delete e[k];
     return e;
   };
   const plainRun = spawnSync(process.execPath, [cli, "list"], { env: env({}), encoding: "utf8" });
@@ -222,5 +224,5 @@ test("an unexpected failure says it is a bug, where to report it, and exits 2", 
   const { code, err } = run(["--agent", "codex"], { cwd: dir });
   assert.equal(code, 2);
   assert.match(err, /stopped on an unexpected error/);
-  assert.match(err, /github\.com\/maison-gr\/maisongr-ai-engineering-skills\/issues/);
+  assert.ok(err.includes("https://github.com/maison-gr/maisongr-ai-engineering-skills/issues"), "says where to report it");
 });
