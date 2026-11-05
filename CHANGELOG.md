@@ -6,6 +6,16 @@ What counts as breaking: renaming or removing a skill, subagent or principle, or
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-11-05
+
+### Added
+
+- After an install, a "You can also" list: `list`, updating, `--global`, `--agent`, `remove` and `--help`.
+
+### Fixed
+
+- A repeat install reports skills and subagents that are already current as unchanged, instead of updated, and rewrites only those that differ.
+
 ### Changed
 
 - A clearer CLI. Every file it touches is marked ✓ changed, · already as it should be, or ! could not be changed; the run ends with the next steps and Done, with how many lines need a look. Errors say the cause first and the fix under it, and suggest the command, agent or option meant (`remvoe` → `remove`). An unexpected failure says it's a bug and where to report it, and exits with 2. A dry run ends with the command that makes the change. Colour only on a terminal that shows it (`NO_COLOR`, `FORCE_COLOR` and the new `--no-color` are followed), and ASCII symbols in the old Windows console.
