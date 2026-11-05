@@ -195,24 +195,39 @@ function write(path, content, dryRun) {
   writeFileSync(path, content);
 }
 
+/** Whether two folders hold the same files with the same contents. */
+function sameTree(a, b) {
+  if (!existsSync(b)) return false;
+  const names = readdirSync(a, { withFileTypes: true });
+  if (readdirSync(b).length !== names.length) return false;
+  return names.every((entry) =>
+    entry.isDirectory() ? sameTree(join(a, entry.name), join(b, entry.name)) : existsSync(join(b, entry.name)) && readFileSync(join(a, entry.name)).equals(readFileSync(join(b, entry.name))),
+  );
+}
+
 function install(targets, dryRun, report) {
   for (const dir of targets.skillDirs) {
     const skills = packageSkills();
     const existed = skills.some((skill) => existsSync(join(dir, skill)));
+    // Only the skills that differ are rewritten, so a repeat run reports "unchanged" honestly.
+    const stale = skills.filter((skill) => !sameTree(join(packageRoot, "skills", skill), join(dir, skill)));
     if (!dryRun) {
-      for (const skill of skills) {
+      for (const skill of stale) {
         rmSync(join(dir, skill), { recursive: true, force: true });
         cpSync(join(packageRoot, "skills", skill), join(dir, skill), { recursive: true });
       }
     }
-    report.record(existed ? "updated" : "added", join(dir, "maisongr-*"), `${skills.length} skills`);
+    if (!stale.length) report.record("unchanged", join(dir, "maisongr-*"), `${skills.length} skills`);
+    else report.record(existed ? "updated" : "added", join(dir, "maisongr-*"), existed && stale.length < skills.length ? `${stale.length} of ${skills.length} skills` : `${skills.length} skills`);
   }
 
   if (targets.agentDir) {
     const agents = packageAgents();
     const existed = agents.some((agent) => existsSync(join(targets.agentDir, agent)));
-    for (const agent of agents) write(join(targets.agentDir, agent), readFileSync(join(packageRoot, "agents", agent)), dryRun);
-    report.record(existed ? "updated" : "added", join(targets.agentDir, "maisongr-*.md"), `${agents.length} subagents`);
+    const stale = agents.filter((agent) => !existsSync(join(targets.agentDir, agent)) || !readFileSync(join(packageRoot, "agents", agent)).equals(readFileSync(join(targets.agentDir, agent))));
+    for (const agent of stale) write(join(targets.agentDir, agent), readFileSync(join(packageRoot, "agents", agent)), dryRun);
+    if (!stale.length) report.record("unchanged", join(targets.agentDir, "maisongr-*.md"), `${agents.length} subagents`);
+    else report.record(existed ? "updated" : "added", join(targets.agentDir, "maisongr-*.md"), `${stale.length === agents.length ? agents.length : `${stale.length} of ${agents.length}`} subagents`);
   }
 
   for (const path of targets.principles) {
@@ -363,6 +378,13 @@ function main() {
     ui.heading("Next");
     ui.next("Restart your agent so it picks up the changes");
     if (!values.global) ui.next("Commit the new files", "so everyone on the project, and every agent, uses the same standard");
+    ui.heading("You can also");
+    ui.next(ui.code("npx maisongr-skills list"), "see the skills and what each one is for");
+    ui.next(ui.code("npx maisongr-skills"), "again any time, to update to the latest version; it is safe to repeat");
+    if (!values.global) ui.next(ui.code("npx maisongr-skills --global"), "install for your user account, in every project");
+    ui.next(ui.code("npx maisongr-skills --agent claude,codex"), "only for the agents you use");
+    ui.next(ui.code("npx maisongr-skills remove"), "take out everything it installed, and keep your own content");
+    ui.next(ui.code("npx maisongr-skills --help"), "every command and option");
   }
   ui.done(Date.now() - started, dryRun ? "Dry run done: nothing was written" : "Done");
 }

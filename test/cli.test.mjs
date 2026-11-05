@@ -151,6 +151,8 @@ test("success: a title, what changed file by file, the next steps and Done", () 
   assert.match(out, /\n {2}Installed\n/);
   assert.match(out, /\n {2}[✓+] created +AGENTS\.md\n/);
   assert.match(out, /\n {2}Next\n {2}[→>] Restart your agent/);
+  assert.match(out, /\n {2}You can also\n/);
+  for (const command of ["list", "--global", "remove", "--help"]) assert.match(out, new RegExp(`[→>] npx maisongr-skills ${command}`), command);
   assert.match(out, /\n {2}[✓+] Done \d+m?s\n/);
 });
 
@@ -159,6 +161,14 @@ test("nothing to change is shown quietly, not as a change", () => {
   run([], { cwd: dir });
   const { out } = run([], { cwd: dir });
   assert.match(out, /\n {2}[·-] unchanged +AGENTS\.md\n/);
+  assert.match(out, /[·-] unchanged +\.claude\/skills\/maisongr-\* +\d+ skills/);
+  assert.match(out, /[·-] unchanged +\.claude\/agents\/maisongr-\*\.md +3 subagents/);
+  assert.doesNotMatch(out, /updated/, "nothing is reported as updated when nothing changed");
+
+  writeFileSync(join(dir, ".claude", "skills", "maisongr-debugging", "SKILL.md"), "edited");
+  const changed = run([], { cwd: dir }).out;
+  assert.match(changed, /[✓+] updated +\.claude\/skills\/maisongr-\* +1 of \d+ skills/);
+  assert.match(read(dir, ".claude", "skills", "maisongr-debugging", "SKILL.md"), /^---/);
 });
 
 test("warning: a file it cannot change is marked and counted, and the run still succeeds", () => {
