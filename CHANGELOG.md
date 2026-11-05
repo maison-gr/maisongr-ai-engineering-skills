@@ -6,6 +6,10 @@ What counts as breaking: renaming or removing a skill, subagent or principle, or
 
 ## [Unreleased]
 
+### Changed
+
+- A clearer CLI. Every file it touches is marked ✓ changed, · already as it should be, or ! could not be changed; the run ends with the next steps and Done, with how many lines need a look. Errors say the cause first and the fix under it, and suggest the command, agent or option meant (`remvoe` → `remove`). An unexpected failure says it's a bug and where to report it, and exits with 2. A dry run ends with the command that makes the change. Colour only on a terminal that shows it (`NO_COLOR`, `FORCE_COLOR` and the new `--no-color` are followed), and ASCII symbols in the old Windows console.
+
 ## [1.2.0] - 2026-11-03
 
 ### Added

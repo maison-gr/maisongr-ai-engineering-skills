@@ -7,41 +7,73 @@ import { homedir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
+import { createUi, styleFor } from "./ui.mjs";
 
 const packageRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 const { version } = JSON.parse(readFileSync(join(packageRoot, "package.json"), "utf8"));
+
+// --no-color is read before anything prints, so even an error about other options is plain.
+const noColor = process.argv.includes("--no-color");
+const styleOf = (stream) => ({ ...styleFor(stream), ...(noColor ? { color: false } : {}) });
+const ui = createUi((s) => process.stdout.write(s), styleOf(process.stdout));
+const started = Date.now();
 
 const AGENTS = ["claude", "codex", "cursor", "copilot", "gemini"];
 const START = "<!-- maisongr:start (managed by maisongr-skills; edit outside this block) -->";
 const END = "<!-- maisongr:end -->";
 const BLOCK = new RegExp(`${escape(START)}[\\s\\S]*?${escape(END)}(\\r?\\n){0,2}`);
 
-const usage = `maisongr-skills ${version}
-Maison GR engineering principles and skills for AI coding agents.
+const usage = `
+  maisongr-skills ${version} · Maison GR engineering principles and skills for AI coding agents
 
-Usage:
-  npx maisongr-skills [init]      Install or update in the current project
-  npx maisongr-skills remove      Remove what this tool installed
-  npx maisongr-skills list        List the skills
+  Usage:
+    npx maisongr-skills [init]      Install or update in the current project
+    npx maisongr-skills remove      Remove what this tool installed
+    npx maisongr-skills list        List the skills
 
-Options:
-  --agent <names>   Comma-separated: ${AGENTS.join(", ")}, or all (default: all)
-  --global          Install for your user account instead of one project
-  --dir <path>      Project directory (default: current directory)
-  --dry-run         Show what would change, without writing anything
-  -v, --version     Print the version
-  -h, --help        Print this help
+  Options:
+    --agent <names>   Comma-separated: ${AGENTS.join(", ")}, or all (default: all)
+    --global          Install for your user account instead of one project
+    --dir <path>      Project directory (default: current directory)
+    --dry-run         Show what would change, without writing anything
+    --no-color        Plain text (also NO_COLOR=1)
+    -v, --version     Print the version
+    -h, --help        Print this help
 
-Docs: https://github.com/maison-gr/maisongr-ai-engineering-skills`;
+  Docs: https://github.com/maison-gr/maisongr-ai-engineering-skills
+`;
+
+const COMMANDS = ["init", "update", "remove", "list"];
 
 function escape(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function fail(message) {
-  console.error(`maisongr-skills: ${message}\n\nRun "npx maisongr-skills --help" for usage.`);
-  process.exit(1);
+/** Stops with the cause first and the fix under it; indented lines are commands to copy. */
+function fail(message, code = 1) {
+  createUi((s) => process.stderr.write(s), styleOf(process.stderr)).error(`${message}\nnpx maisongr-skills --help lists every command and option.`);
+  process.exit(code);
 }
+
+/** How many letters apart two words are, for "did you mean". */
+function distance(a, b) {
+  const row = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    let prev = row[0];
+    row[0] = i;
+    for (let j = 1; j <= b.length; j++) {
+      const here = row[j];
+      row[j] = Math.min(row[j] + 1, row[j - 1] + 1, prev + (a[i - 1] === b[j - 1] ? 0 : 1));
+      prev = here;
+    }
+  }
+  return row[b.length];
+}
+
+const suggest = (word, choices) => {
+  const near = choices.find((c) => distance(c, word) <= 2);
+  return near ? `\nDid you mean ${near}?` : "";
+};
 
 function parse(argv) {
   let parsed;
@@ -55,25 +87,32 @@ function parse(argv) {
         global: { type: "boolean" },
         dir: { type: "string" },
         "dry-run": { type: "boolean" },
+        "no-color": { type: "boolean" },
         version: { type: "boolean", short: "v" },
         help: { type: "boolean", short: "h" },
       },
     });
   } catch (error) {
-    fail(error.message);
+    // Node's own wording, made a sentence: "Unknown option '--bogus'".
+    const option = error.message.match(/'(--?[\w-]+)'/)?.[1];
+    fail(
+      option && /unknown option/i.test(error.message)
+        ? `Unknown option ${option}.${suggest(option.replace(/^-+/, ""), ["agent", "global", "dir", "dry-run", "no-color", "version", "help"]).replace("mean ", "mean --")}`
+        : `${error.message.replace(/\. To specify.*$/s, "")}.`,
+    );
   }
   const { positionals } = parsed;
   const values = { agent: "all", ...parsed.values };
   const command = positionals[0] ?? "init";
-  if (positionals.length > 1) fail(`unexpected argument "${positionals[1]}"`);
-  if (!["init", "update", "remove", "list"].includes(command)) fail(`unknown command "${command}"`);
-  if (values.global && values.dir) fail("--global and --dir cannot be used together");
+  if (positionals.length > 1) fail(`Unexpected argument "${positionals[1]}".\nGive one command: ${COMMANDS.join(", ")}.`);
+  if (!COMMANDS.includes(command)) fail(`Unknown command "${command}".${suggest(command, COMMANDS)}`);
+  if (values.global && values.dir) fail("--global and --dir cannot be used together.\n--global installs for your user account; --dir names one project.");
 
   const requested = values.agent.split(",").map((name) => name.trim().toLowerCase()).filter(Boolean);
   const agents = requested.includes("all") ? AGENTS : requested;
   const unknown = agents.filter((name) => !AGENTS.includes(name));
-  if (unknown.length) fail(`unknown agent "${unknown[0]}"; choose from ${AGENTS.join(", ")} or all`);
-  if (!agents.length) fail("--agent needs at least one name");
+  if (unknown.length) fail(`Unknown agent "${unknown[0]}".${suggest(unknown[0], AGENTS)}\nChoose from ${AGENTS.join(", ")}, or all.`);
+  if (!agents.length) fail("--agent needs at least one name.\n  npx maisongr-skills --agent claude,codex");
 
   return { command, agents, values };
 }
@@ -134,8 +173,18 @@ function makeReporter(base, dryRun) {
     lines,
     show,
     record(action, path, detail = "") {
-      const label = dryRun ? (dryRunVerbs[action] ?? action) : action;
-      lines.push(`  ${label.padEnd(14)} ${show(path)}${detail ? `  (${detail})` : ""}`);
+      lines.push({ action, label: dryRun ? (dryRunVerbs[action] ?? action) : action, path: show(path), detail });
+    },
+    /** One line per file: ✓ for a change, · for nothing to change, ! for one it could not make. */
+    print() {
+      const width = Math.max(...lines.map((l) => l.label.length));
+      const pathWidth = Math.min(40, Math.max(...lines.map((l) => l.path.length)));
+      for (const l of lines) {
+        const text = `${l.label.padEnd(width)}  ${l.detail ? l.path.padEnd(pathWidth) : l.path}`;
+        if (l.action === "skipped") ui.warn(text, l.detail);
+        else if (l.action === "unchanged") ui.same(text, l.detail);
+        else ui.ok(text, l.detail);
+      }
     },
   };
 }
@@ -268,12 +317,17 @@ function remove(targets, dryRun, report) {
 }
 
 function list() {
-  for (const skill of packageSkills()) {
+  const skills = packageSkills();
+  ui.heading("Skills", skills.length);
+  for (const skill of skills) {
     const text = readFileSync(join(packageRoot, "skills", skill, "SKILL.md"), "utf8");
     const description = text.match(/^description:\s*(.*)$/m)?.[1] ?? "";
     const summary = description.split(". ")[0].replace(/^Maison GR method for /, "");
-    console.log(`  ${skill.padEnd(26)} ${summary.charAt(0).toUpperCase()}${summary.slice(1)}`);
+    ui.text(`${skill.padEnd(26)} ${ui.paint(`${summary.charAt(0).toUpperCase()}${summary.slice(1)}`, "dim")}`);
   }
+  ui.line();
+  ui.text(ui.paint(`Install them all: ${ui.code("npx maisongr-skills")}`, "dim"));
+  ui.line();
 }
 
 function main() {
@@ -281,28 +335,46 @@ function main() {
   const { command, values } = options;
   if (values.help) return console.log(usage);
   if (values.version) return console.log(version);
+  ui.title(version, command);
   if (command === "list") return list();
 
   const dryRun = Boolean(values["dry-run"]);
   const targets = plan(options);
-  if (!values.global && !existsSync(targets.base)) fail(`directory not found: ${targets.base}`);
+  if (!values.global && !existsSync(targets.base)) {
+    fail(`Directory not found: ${targets.base}\nCheck the path given to --dir, or run it from inside the project.`);
+  }
 
   const report = makeReporter(targets.base, dryRun);
   if (command === "remove") remove(targets, dryRun, report);
   else install(targets, dryRun, report);
 
   const scope = values.global ? "your user account" : targets.base;
-  const verb = command === "remove" ? "Removing from" : "Installing into";
-  console.log(`maisongr-skills ${version}: ${verb} ${scope}${dryRun ? " (dry run, nothing written)" : ""}\n`);
-  console.log(report.lines.length ? report.lines.join("\n") : "  Nothing to do.");
-  for (const note of targets.notes) console.log(`\nNote: ${note}`);
+  ui.subject(`${command === "remove" ? "Removing from" : "Installing into"} ${scope}`, dryRun ? "dry run: nothing is written" : undefined);
+  ui.heading(dryRun ? "Would change" : command === "remove" ? "Removed" : "Installed");
+  if (report.lines.length) report.print();
+  else ui.same(command === "remove" ? "Nothing to remove: nothing from maisongr-skills is installed here" : "Nothing to do");
+  // A note that limits what was installed needs a look; one about files left in place is a next step.
+  for (const note of targets.notes) (command === "remove" ? ui.next : ui.warn)(note);
 
-  if (command !== "remove" && !dryRun) {
-    console.log(
-      "\nDone. Restart your agent so it picks up the changes." +
-        (values.global ? "" : "\nCommit the new files so everyone on the project, and every agent, uses the same standard."),
-    );
+  if (dryRun) {
+    ui.heading("Next");
+    ui.next(`Run it without --dry-run to make these changes: ${ui.code(`npx maisongr-skills ${process.argv.slice(2).filter((a) => a !== "--dry-run").join(" ")}`.trim())}`);
+  } else if (command !== "remove") {
+    ui.heading("Next");
+    ui.next("Restart your agent so it picks up the changes");
+    if (!values.global) ui.next("Commit the new files", "so everyone on the project, and every agent, uses the same standard");
   }
+  ui.done(Date.now() - started, dryRun ? "Dry run done: nothing was written" : "Done");
 }
 
-main();
+try {
+  main();
+} catch (error) {
+  // A bug, not a mistake in the command: say so, and where to report it.
+  if (process.env.DEBUG) throw error;
+  fail(
+    `maisongr-skills stopped on an unexpected error: ${error.message}\n` +
+      `Some files may already be written; run it again once fixed, it is safe to repeat. Please report it:\n  https://github.com/maison-gr/maisongr-ai-engineering-skills/issues`,
+    2,
+  );
+}

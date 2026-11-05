@@ -126,7 +126,7 @@ test("--global installs into the home directory", () => {
 test("list, help and version", () => {
   const listed = run(["list"]);
   assert.equal(listed.code, 0);
-  assert.equal(count(listed.out, "maisongr-"), skillCount);
+  assert.equal(listed.out.split("\n").filter((line) => /^ {4}maisongr-/.test(line)).length, skillCount);
   assert.match(run(["--help"]).out, /Usage:/);
   const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
   assert.equal(run(["--version"]).out.trim(), version);
@@ -136,6 +136,81 @@ test("invalid input fails with a clear message", () => {
   for (const args of [["deploy"], ["--agent", "vim"], ["--bogus"], ["--global", "--dir", "x"], ["--dir", join(project(), "missing")]]) {
     const { code, err } = run(args, { cwd: project() });
     assert.equal(code, 1, `exit code for ${args.join(" ")}`);
-    assert.match(err, /^maisongr-skills: /, `message for ${args.join(" ")}`);
+    assert.match(err, /^\n {2}[✗x] [A-Z-]/, `message for ${args.join(" ")}`);
+    assert.match(err, /--help lists every command and option/, `the way out, for ${args.join(" ")}`);
   }
+});
+
+// What a person sees: every run ends in a success, a warning or an error they can act on.
+
+test("success: a title, what changed file by file, the next steps and Done", () => {
+  const { code, out, err } = run([], { cwd: project() });
+  assert.equal(code, 0);
+  assert.equal(err, "");
+  assert.match(out, /^\n {2}maisongr-skills \d+\.\d+\.\d+ · init\n/);
+  assert.match(out, /\n {2}Installed\n/);
+  assert.match(out, /\n {2}[✓+] created +AGENTS\.md\n/);
+  assert.match(out, /\n {2}Next\n {2}[→>] Restart your agent/);
+  assert.match(out, /\n {2}[✓+] Done \d+m?s\n/);
+});
+
+test("nothing to change is shown quietly, not as a change", () => {
+  const dir = project();
+  run([], { cwd: dir });
+  const { out } = run([], { cwd: dir });
+  assert.match(out, /\n {2}[·-] unchanged +AGENTS\.md\n/);
+});
+
+test("warning: a file it cannot change is marked and counted, and the run still succeeds", () => {
+  const dir = project();
+  mkdirSync(join(dir, ".gemini"));
+  writeFileSync(join(dir, ".gemini", "settings.json"), "{ // a comment\n}");
+  const { code, out } = run([], { cwd: dir });
+  assert.equal(code, 0);
+  assert.match(out, /\n {2}! skipped +\.gemini\/settings\.json +not plain JSON/);
+  assert.match(out, /Done · 1 to look at above/);
+});
+
+test("dry run: says nothing is written, and how to make the change", () => {
+  const { out } = run(["--dry-run", "--agent", "codex"], { cwd: project() });
+  assert.match(out, /dry run: nothing is written/);
+  assert.match(out, /Would change/);
+  assert.match(out, /Run it without --dry-run to make these changes: npx maisongr-skills --agent codex/);
+  assert.match(out, /Dry run done: nothing was written/);
+});
+
+test("remove with nothing installed says so", () => {
+  const { code, out } = run(["remove"], { cwd: project() });
+  assert.equal(code, 0);
+  assert.match(out, /Nothing to remove/);
+});
+
+test("errors suggest what was meant", () => {
+  assert.match(run(["remvoe"], { cwd: project() }).err, /Unknown command "remvoe"\.\n {4}Did you mean remove\?/);
+  assert.match(run(["--agent", "cluade"], { cwd: project() }).err, /Unknown agent "cluade"\.\n {4}Did you mean claude\?/);
+  assert.match(run(["--dry-rnu"], { cwd: project() }).err, /Unknown option --dry-rnu\.\n {4}Did you mean --dry-run\?/);
+});
+
+test("colour on a terminal only: off when piped, NO_COLOR or --no-color, on with FORCE_COLOR", () => {
+  const ESC = "\u001b[";
+  const env = (extra) => {
+    const e = { ...process.env, ...extra };
+    for (const k of ["FORCE_COLOR", "NO_COLOR"]) if (!(k in extra)) delete e[k];
+    return e;
+  };
+  const plainRun = spawnSync(process.execPath, [cli, "list"], { env: env({}), encoding: "utf8" });
+  assert.ok(!plainRun.stdout.includes(ESC), "a pipe gets plain text");
+  const forced = spawnSync(process.execPath, [cli, "list"], { env: env({ FORCE_COLOR: "1" }), encoding: "utf8" });
+  assert.ok(forced.stdout.includes(ESC), "FORCE_COLOR colours it");
+  const off = spawnSync(process.execPath, [cli, "list", "--no-color"], { env: env({ FORCE_COLOR: "1" }), encoding: "utf8" });
+  assert.ok(!off.stdout.includes(ESC), "--no-color wins");
+});
+
+test("an unexpected failure says it is a bug, where to report it, and exits 2", () => {
+  const dir = project();
+  mkdirSync(join(dir, "AGENTS.md")); // a folder where the file should be
+  const { code, err } = run(["--agent", "codex"], { cwd: dir });
+  assert.equal(code, 2);
+  assert.match(err, /stopped on an unexpected error/);
+  assert.match(err, /github\.com\/maison-gr\/maisongr-ai-engineering-skills\/issues/);
 });
