@@ -6,6 +6,10 @@ What counts as breaking: renaming or removing a skill, subagent or principle, or
 
 ## [Unreleased]
 
+### Fixed
+
+- Receipts no longer reports a Git config read as a change when the next line, a pipe, `&&` or a redirect follows it.
+
 ## [1.3.0] - 2026-11-05
 
 ### Added

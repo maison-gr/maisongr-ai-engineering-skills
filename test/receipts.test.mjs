@@ -122,3 +122,18 @@ test("does not flag staging by name, a plain commit, or a config read", () => {
   s.ran("git config user.name");
   assert.equal(s.stop(report("committed the fix")), null);
 });
+
+test("does not read what follows a config read as its value", () => {
+  const s = session();
+  s.ran("git config --global user.name\ngit config --global user.email\ngh pr list");
+  s.ran("git config user.name && git config user.email");
+  s.ran("git config user.name | head -1");
+  s.ran("git config user.email 2>/dev/null");
+  assert.equal(s.stop(report("committed the fix")), null);
+});
+
+test("still flags a config write in a multi-line command", () => {
+  const s = session();
+  s.ran('cd repo\ngit config --global user.email "x@y.z"\ngit status');
+  assert.match(s.stop(report("done")).reason, /changed Git config/);
+});

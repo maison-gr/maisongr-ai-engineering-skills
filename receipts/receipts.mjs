@@ -94,7 +94,7 @@ const GUARDRAILS = [
   },
   {
     what: "changed Git config",
-    test: /\bgit\s+config\s+(?:--(?:global|local|system)\s+)?[\w.]+\s+["']?\S/i,
+    test: /\bgit[ \t]+config[ \t]+(?:--(?:global|local|system)[ \t]+)?[\w.]+[ \t]+(?!\d*[>|&;<])["']?\S/i,
     ack: /git\s+config|config\w*\s+(chang|set|updat)/i,
   },
 ];
