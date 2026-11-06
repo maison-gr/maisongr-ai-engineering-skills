@@ -78,7 +78,7 @@ Maison GR receipts: this session took a guarded action without owning it in the 
 Each is allowed only if the user asked for it here. Say so and justify it in your report, or undo it.
 ```
 
-It checks only command names in backticks (and the guarded Git actions above), never blocks twice in a row, and keeps its record on your machine, in Claude Code's plugin data folder. Receipts need the [Claude Code plugin](#install); other agents get the same report format without the check.
+It checks only command names in backticks (and the guarded Git actions above), never blocks twice in a row, doesn't raise an action again once a report has owned it, and keeps its record on your machine, in Claude Code's plugin data folder. Receipts need the [Claude Code plugin](#install); other agents get the same report format without the check.
 
 ## How it works
 

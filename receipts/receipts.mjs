@@ -70,7 +70,8 @@ export function checkClaims(message, runs) {
 // Guarded, often irreversible Git actions (see "Guard irreversible actions"). Each is allowed
 // only when the user asked for it in this conversation. The record can't know whether they did,
 // but it can make sure the agent owned the action in its report: if one ran and the report never
-// mentions it, the agent is sent back to disclose and justify it, or undo it.
+// mentions it, the agent is sent back to disclose and justify it, or undo it. Once a report owns
+// an action it is not raised again; the same kind of action happening later is.
 const GUARDRAILS = [
   {
     what: "force-pushed",
@@ -99,15 +100,18 @@ const GUARDRAILS = [
   },
 ];
 
-export function checkGuardrails(message, runs) {
+export function checkGuardrails(message, log) {
   const text = String(message ?? "");
   const problems = [];
+  const owned = [];
   for (const rule of GUARDRAILS) {
-    const hit = runs.find((run) => rule.test.test(run.command));
-    if (!hit || rule.ack.test(text)) continue;
-    problems.push(`this session ${rule.what} (\`${normalise(hit.command)}\`) but your report never mentions it.`);
+    const since = log.slice(log.findLastIndex((entry) => entry.owned === rule.what) + 1);
+    const hit = since.find((entry) => entry.command !== undefined && rule.test.test(entry.command));
+    if (!hit) continue;
+    if (rule.ack.test(text)) owned.push(rule.what);
+    else problems.push(`this session ${rule.what} (\`${normalise(hit.command)}\`) but your report never mentions it.`);
   }
-  return problems;
+  return { problems, owned };
 }
 
 function logFile(sessionId) {
@@ -116,7 +120,7 @@ function logFile(sessionId) {
   return join(dir, `${String(sessionId).replace(/[^\w-]/g, "_")}.jsonl`);
 }
 
-function readRuns(file) {
+function readLog(file) {
   if (!existsSync(file)) return [];
   return readFileSync(file, "utf8").split("\n").filter(Boolean).map((line) => JSON.parse(line));
 }
@@ -133,12 +137,15 @@ function record(input) {
 }
 
 function check(input) {
+  const message = input.last_assistant_message;
+  const file = logFile(input.session_id);
+  const log = readLog(file);
+  const { problems: guardrails, owned } = checkGuardrails(message, log);
+  for (const what of owned) appendFileSync(file, `${JSON.stringify({ owned: what })}
+`);
   // Block once at most: if the agent was already sent back, let it stop.
   if (input.stop_hook_active) return;
-  const message = input.last_assistant_message;
-  const runs = readRuns(logFile(input.session_id));
-  const claims = checkClaims(message, runs);
-  const guardrails = checkGuardrails(message, runs);
+  const claims = checkClaims(message, log.filter((entry) => entry.command !== undefined));
   if (claims.length === 0 && guardrails.length === 0) return;
   const parts = [];
   if (claims.length) {

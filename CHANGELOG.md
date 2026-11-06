@@ -9,6 +9,7 @@ What counts as breaking: renaming or removing a skill, subagent or principle, or
 ### Fixed
 
 - Receipts no longer reports a Git config read as a change when the next line, a pipe, `&&` or a redirect follows it.
+- Receipts no longer raises a guarded action again in every later report once a report has owned it. The same kind of action happening later is still flagged.
 
 ## [1.3.0] - 2026-11-05
 

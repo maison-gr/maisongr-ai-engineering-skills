@@ -95,6 +95,36 @@ test("allows a guarded action the report owns", () => {
   assert.equal(s.stop(report("force-pushed to update the PR, as you asked")), null);
 });
 
+test("does not flag an action again once a report owned it", () => {
+  const s = session();
+  s.ran("git push --force origin fix/foo");
+  assert.equal(s.stop(report("force-pushed to update the PR, as you asked")), null);
+  assert.equal(s.stop(report("next task done")), null);
+});
+
+test("remembers an action owned after being sent back", () => {
+  const s = session();
+  s.ran("git commit --no-verify -m wip");
+  assert.equal(s.stop(report("done")).decision, "block");
+  assert.equal(s.stop(report("I used --no-verify by mistake"), { stop_hook_active: true }), null);
+  assert.equal(s.stop(report("next task done")), null);
+});
+
+test("keeps flagging an action no report owned", () => {
+  const s = session();
+  s.ran("git commit --no-verify -m wip");
+  assert.equal(s.stop(report("done"), { stop_hook_active: true }), null);
+  assert.equal(s.stop(report("next task done")).decision, "block");
+});
+
+test("flags the same kind of action again when it happens again", () => {
+  const s = session();
+  s.ran("git push --force origin fix/foo");
+  assert.equal(s.stop(report("force-pushed, as you asked")), null);
+  s.ran("git push --force origin fix/bar");
+  assert.match(s.stop(report("next task done")).reason, /fix\/bar/);
+});
+
 test("blocks blind staging the report doesn't mention", () => {
   const s = session();
   s.ran("git add -A");
