@@ -141,8 +141,7 @@ function check(input) {
   const file = logFile(input.session_id);
   const log = readLog(file);
   const { problems: guardrails, owned } = checkGuardrails(message, log);
-  for (const what of owned) appendFileSync(file, `${JSON.stringify({ owned: what })}
-`);
+  for (const what of owned) appendFileSync(file, `${JSON.stringify({ owned: what })}\n`);
   // Block once at most: if the agent was already sent back, let it stop.
   if (input.stop_hook_active) return;
   const claims = checkClaims(message, log.filter((entry) => entry.command !== undefined));
