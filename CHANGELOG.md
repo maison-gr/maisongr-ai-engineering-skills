@@ -6,6 +6,12 @@ What counts as breaking: renaming or removing a skill, subagent or principle, or
 
 ## [Unreleased]
 
+## [1.3.1] - 2026-11-06
+
+### Changed
+
+- The repository is now `maison-gr/maisongr-skills`, matching the npm package. The old address redirects.
+
 ### Fixed
 
 - Receipts no longer reports a Git config read as a change when the next line, a pipe, `&&` or a redirect follows it.
