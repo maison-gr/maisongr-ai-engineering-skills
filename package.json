@@ -13,11 +13,11 @@
     "code-review",
     "engineering"
   ],
-  "homepage": "https://github.com/maison-gr/maisongr-ai-engineering-skills#readme",
-  "bugs": "https://github.com/maison-gr/maisongr-ai-engineering-skills/issues",
+  "homepage": "https://github.com/maison-gr/maisongr-skills#readme",
+  "bugs": "https://github.com/maison-gr/maisongr-skills/issues",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/maison-gr/maisongr-ai-engineering-skills.git"
+    "url": "git+https://github.com/maison-gr/maisongr-skills.git"
   },
   "license": "MIT",
   "author": "Maison GR (https://www.maisongr.com)",

@@ -224,5 +224,5 @@ test("an unexpected failure says it is a bug, where to report it, and exits 2", 
   const { code, err } = run(["--agent", "codex"], { cwd: dir });
   assert.equal(code, 2);
   assert.match(err, /stopped on an unexpected error/);
-  assert.match(err, /^ {4}https:\/\/github\.com\/maison-gr\/maisongr-ai-engineering-skills\/issues$/m, "says where to report it, on its own line");
+  assert.match(err, /^ {4}https:\/\/github\.com\/maison-gr\/maisongr-skills\/issues$/m, "says where to report it, on its own line");
 });

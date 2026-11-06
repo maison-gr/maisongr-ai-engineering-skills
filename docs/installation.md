@@ -54,11 +54,11 @@ Commit the result so the whole team uses it. The sections below describe each pl
 The copy-based steps below assume a local clone:
 
 ```bash
-git clone --depth 1 https://github.com/maison-gr/maisongr-ai-engineering-skills.git ~/maisongr
+git clone --depth 1 https://github.com/maison-gr/maisongr-skills.git ~/maisongr
 ```
 
 ```powershell
-git clone --depth 1 https://github.com/maison-gr/maisongr-ai-engineering-skills.git "$HOME\maisongr"
+git clone --depth 1 https://github.com/maison-gr/maisongr-skills.git "$HOME\maisongr"
 ```
 
 Then, from your project's root:
@@ -93,20 +93,20 @@ The plugin installs all ten skills, three subagents (`maisongr-architect`, `mais
 Inside Claude Code:
 
 ```text
-/plugin marketplace add maison-gr/maisongr-ai-engineering-skills
+/plugin marketplace add maison-gr/maisongr-skills
 /plugin install maisongr@maison-gr
 ```
 
 On Claude Code 2.1.275 or later, one command does both:
 
 ```text
-/plugin install maisongr --marketplace maison-gr/maisongr-ai-engineering-skills
+/plugin install maisongr --marketplace maison-gr/maisongr-skills
 ```
 
 From a terminal:
 
 ```bash
-claude plugin marketplace add maison-gr/maisongr-ai-engineering-skills
+claude plugin marketplace add maison-gr/maisongr-skills
 claude plugin install maisongr@maison-gr
 ```
 
@@ -176,7 +176,7 @@ Codex loads the skill list at startup and reads a full skill only when it uses i
 You can also ask Codex's built-in installer to fetch a single skill from GitHub:
 
 ```text
-$skill-installer install https://github.com/maison-gr/maisongr-ai-engineering-skills/tree/main/skills/maisongr-debugging
+$skill-installer install https://github.com/maison-gr/maisongr-skills/tree/main/skills/maisongr-debugging
 ```
 
 To confirm what Codex loaded:
@@ -234,7 +234,7 @@ Copilot code review reads instructions from the pull request's head branch, so c
 The extension installs the principles as always-on context, plus all ten skills and three subagents:
 
 ```bash
-gemini extensions install https://github.com/maison-gr/maisongr-ai-engineering-skills
+gemini extensions install https://github.com/maison-gr/maisongr-skills
 ```
 
 Run it from a terminal, not inside an interactive session, then restart Gemini CLI. Check the result with `gemini extensions list`, and `/skills list` inside a session.

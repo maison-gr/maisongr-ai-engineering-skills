@@ -40,7 +40,7 @@ const usage = `
     -v, --version     Print the version
     -h, --help        Print this help
 
-  Docs: https://github.com/maison-gr/maisongr-ai-engineering-skills
+  Docs: https://github.com/maison-gr/maisongr-skills
 `;
 
 const COMMANDS = ["init", "update", "remove", "list"];
@@ -396,7 +396,7 @@ try {
   if (process.env.DEBUG) throw error;
   fail(
     `maisongr-skills stopped on an unexpected error: ${error.message}\n` +
-      `Some files may already be written; run it again once fixed, it is safe to repeat. Please report it:\n  https://github.com/maison-gr/maisongr-ai-engineering-skills/issues`,
+      `Some files may already be written; run it again once fixed, it is safe to repeat. Please report it:\n  https://github.com/maison-gr/maisongr-skills/issues`,
     2,
   );
 }

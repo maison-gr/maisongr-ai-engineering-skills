@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/maison-gr/maisongr-ai-engineering-skills/main/.github/social-preview.png" alt="Maison GR AI Engineering Skills: seven principles and ten skills for AI coding agents" width="720">
+  <img src="https://raw.githubusercontent.com/maison-gr/maisongr-skills/main/.github/social-preview.png" alt="Maison GR AI Engineering Skills: seven principles and ten skills for AI coding agents" width="720">
 </p>
 
 <h1 align="center">One engineering standard for every AI coding agent</h1>
@@ -14,7 +14,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/maison-gr/maisongr-ai-engineering-skills/actions/workflows/validate.yml"><img src="https://github.com/maison-gr/maisongr-ai-engineering-skills/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
+  <a href="https://github.com/maison-gr/maisongr-skills/actions/workflows/validate.yml"><img src="https://github.com/maison-gr/maisongr-skills/actions/workflows/validate.yml/badge.svg" alt="Validate"></a>
   <a href="https://www.npmjs.com/package/maisongr-skills"><img src="https://img.shields.io/npm/v/maisongr-skills.svg" alt="npm version"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT"></a>
 </p>
@@ -156,14 +156,14 @@ Commit the result so your whole team, and every agent, works to the same standar
 **Claude Code plugin**, inside Claude Code:
 
 ```text
-/plugin marketplace add maison-gr/maisongr-ai-engineering-skills
+/plugin marketplace add maison-gr/maisongr-skills
 /plugin install maisongr@maison-gr
 ```
 
 **Gemini CLI extension:**
 
 ```bash
-gemini extensions install https://github.com/maison-gr/maisongr-ai-engineering-skills
+gemini extensions install https://github.com/maison-gr/maisongr-skills
 ```
 
 The plugin and extension install the skills and subagents; for the always-on principles in Claude Code, also run `npx maisongr-skills --agent claude` or add `@AGENTS.md` to your `CLAUDE.md`. The [installation guide](docs/installation.md) covers project and user scopes, manual copying, updates and removal on every platform.
@@ -176,7 +176,7 @@ The plugin and extension install the skills and subagents; for the always-on pri
 
 ## Agent still got it wrong?
 
-If an agent with Maison GR installed still guessed, over-built, touched files it should not have, or claimed checks it never ran, [send us the transcript](https://github.com/maison-gr/maisongr-ai-engineering-skills/issues/new?template=agent-failure-report.md). Each report becomes a test case for the next release.
+If an agent with Maison GR installed still guessed, over-built, touched files it should not have, or claimed checks it never ran, [send us the transcript](https://github.com/maison-gr/maisongr-skills/issues/new?template=agent-failure-report.md). Each report becomes a test case for the next release.
 
 To contribute a fix, a skill or a new platform, read [CONTRIBUTING](CONTRIBUTING.md). How the repository is built: [architecture](docs/architecture.md).
 

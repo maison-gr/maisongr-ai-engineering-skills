@@ -10,6 +10,6 @@ In short:
 
 ## Reporting
 
-Report unacceptable behaviour to the maintainers through [GitHub's private vulnerability reporting form](https://github.com/maison-gr/maisongr-ai-engineering-skills/security/advisories/new), marked "Conduct", or by contacting [Maison GR](https://www.maisongr.com). Reports are handled confidentially.
+Report unacceptable behaviour to the maintainers through [GitHub's private vulnerability reporting form](https://github.com/maison-gr/maisongr-skills/security/advisories/new), marked "Conduct", or by contacting [Maison GR](https://www.maisongr.com). Reports are handled confidentially.
 
 Maintainers may remove comments, close threads or block accounts that break this code, following the Contributor Covenant's enforcement guidelines.

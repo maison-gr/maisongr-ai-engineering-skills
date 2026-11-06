@@ -20,7 +20,7 @@ Bugs in an agent itself (Claude Code, Codex, Cursor, Copilot, Gemini CLI) belong
 
 ## Reporting a vulnerability
 
-Report privately through [GitHub's private vulnerability reporting](https://github.com/maison-gr/maisongr-ai-engineering-skills/security/advisories/new). Do not open a public issue.
+Report privately through [GitHub's private vulnerability reporting](https://github.com/maison-gr/maisongr-skills/security/advisories/new). Do not open a public issue.
 
 Include:
 

@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Question or idea
-    url: https://github.com/maison-gr/maisongr-ai-engineering-skills/discussions
+    url: https://github.com/maison-gr/maisongr-skills/discussions
     about: Ask how to install or use a skill, or share an idea.
   - name: Security vulnerability
-    url: https://github.com/maison-gr/maisongr-ai-engineering-skills/security/advisories/new
+    url: https://github.com/maison-gr/maisongr-skills/security/advisories/new
     about: Report privately. Do not open a public issue.

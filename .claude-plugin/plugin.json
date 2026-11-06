@@ -7,8 +7,8 @@
     "name": "Maison GR",
     "url": "https://github.com/maison-gr"
   },
-  "homepage": "https://github.com/maison-gr/maisongr-ai-engineering-skills",
-  "repository": "https://github.com/maison-gr/maisongr-ai-engineering-skills",
+  "homepage": "https://github.com/maison-gr/maisongr-skills",
+  "repository": "https://github.com/maison-gr/maisongr-skills",
   "license": "MIT",
   "hooks": "./receipts/hooks.json",
   "keywords": ["engineering", "code-review", "testing", "debugging", "security", "architecture", "best-practices"]
